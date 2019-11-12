@@ -148,8 +148,8 @@ void SDLfont :: colour(SDL_Surface* surface, int fgc, int bgc){
   palette[1].g=rgb[1];
   palette[1].b=rgb[2];
   for (int i=0;i<256;i++){
-    FIXME(SDL_SetColors(symbol[i], palette, 0, 2);)
-    FIXME(SDL_SetColors(symbolmask[i], palette, 0, 2);)
+    SDL_SetPaletteColors(symbol[i]->format->palette, palette, 0, 2);
+    SDL_SetPaletteColors(symbolmask[i]->format->palette, palette, 0, 2);
   }
 
 }
