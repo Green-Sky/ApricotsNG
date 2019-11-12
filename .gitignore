@@ -16,10 +16,6 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -30,3 +26,17 @@
 *.exe
 *.out
 *.app
+
+# extras
+.vs/
+*.swp
+~*
+.idea/
+cmake-build-debug/
+cmake-build-debugandtest/
+/cmake-build-release
+*.stackdump
+*.coredump
+compile_commands.json
+/build
+
