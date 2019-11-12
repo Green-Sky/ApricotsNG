@@ -60,7 +60,7 @@ void drop_bomb(plane &p, linkedlist <falltype> &fall, sampleio &sound,
     case 10: case 11: case 12: case 13: case 14: case 15: case 16:
       bomb.bombrotate = 1;
       break;
-  } 
+  }
   bomb.rotatedelay = 0;
   fall.add(bomb);
   p.bombs--;
@@ -159,7 +159,7 @@ void act(gamedata &g, int jx, int jy, bool jb){
           // Check for shotfire
           if (g.p().shotdelay == 0){
             if ((jb) && (g.p().ammo > 0)){
-              fire_shot(g.p(), g.shot, g.sound, g.xmove, g.ymove);              
+              fire_shot(g.p(), g.shot, g.sound, g.xmove, g.ymove);
             }
             // Check for bombdrop
             if ((jy == 1) && (g.p().bombs > 0)){
@@ -303,7 +303,7 @@ void act(gamedata &g, int jx, int jy, bool jb){
 
     case 4: // Expunged drak fighter (NB: shouldn't get here!)
       break;
- 
+
 
   }
   // Move the planes
@@ -334,8 +334,8 @@ void act(gamedata &g, int jx, int jy, bool jb){
 
 // Actual keyboard detection
 
-void keyboard(Uint8 *keys, int &jx, int &jy, bool &jb, SDLKey up, SDLKey down,
-              SDLKey left, SDLKey right, SDLKey fire){
+void keyboard(const Uint8 *keys, int &jx, int &jy, bool &jb, SDL_Scancode up, SDL_Scancode down,
+              SDL_Scancode left, SDL_Scancode right, SDL_Scancode fire){
 
   if (keys[left]){
     jx = -1;
@@ -358,16 +358,16 @@ void keyboard(Uint8 *keys, int &jx, int &jy, bool &jb, SDLKey up, SDLKey down,
 // Plane control routine
 // Returns control in arguments jx,jy,jb
 
-void control(gamedata &g, Uint8 *keys, int &jx, int &jy, bool &jb){
+void control(gamedata &g, const Uint8 *keys, int &jx, int &jy, bool &jb){
 
   switch(g.p().control){
     case 1: // Player 1
-      keyboard(keys, jx, jy, jb, SDLK_UP, SDLK_DOWN,
-               SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN);
+      keyboard(keys, jx, jy, jb, SDL_SCANCODE_UP, SDL_SCANCODE_DOWN,
+               SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_RETURN);
       break;
     case 2: // Player 2
-      keyboard(keys, jx, jy, jb, SDLK_s, SDLK_x,
-               SDLK_z, SDLK_c, SDLK_LCTRL);
+      keyboard(keys, jx, jy, jb, SDL_SCANCODE_S, SDL_SCANCODE_S,
+               SDL_SCANCODE_Z, SDL_SCANCODE_C, SDL_SCANCODE_LCTRL);
       break;
     default: // Computer controlled
       computer_ai(g, g.p(), jx, jy, jb);
@@ -400,7 +400,7 @@ void game (gamedata &g){
 
   while (!quit && (g.winner == 0)){
 
-    Uint8 *keys = SDL_GetKeyState(NULL);
+    const Uint8 *keys = SDL_GetKeyboardState(NULL);
     if (keys[SDLK_ESCAPE] == SDL_PRESSED){
       quit = true;
     }

@@ -9,6 +9,8 @@
 #include <iostream>
 using namespace std;
 
+#define FIXME(x) printf("FIXME: '%s'\n", #x);
+
 class SDLfont{
   private:
     int width;
@@ -26,3 +28,4 @@ class SDLfont{
     void writemask(SDL_Surface*, int, int, char*);
     void write(SDL_Surface*, int, int, char*);
 };
+

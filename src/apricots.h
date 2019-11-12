@@ -28,6 +28,8 @@
 #include "SDLfont.h"
 using namespace std;
 
+#define FIXME(x) printf("FIXME: '%s'\n", #x);
+
 // Global constants
 
 const int GAME_WIDTH = 2400;
@@ -313,9 +315,14 @@ struct gamedata{
   plane* player2;
   airbase base[7];
   info planeinfo[7];
+
+  SDL_Window *sdl_window;
+  //SDL_Renderer *sdl_renderer;
   SDL_Surface *physicalscreen;
+  SDL_Texture *screen_tex;
   SDL_Surface *virtualscreen;
   SDL_Surface *gamescreen;
+
   shape images[319];
   map gamemap;
   linkedlist <radartype> radar;

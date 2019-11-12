@@ -25,23 +25,56 @@
 // Display setup (double buffered with two playfields)
 
 void setup_display(gamedata &g){
-  /*g.physicalscreen = SDL_SetVideoMode(640, 480, 8, 
+  g.sdl_window = SDL_CreateWindow("ApricotsNG",
+    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    640, 480,
+    SDL_WINDOW_FULLSCREEN);
+  if (!g.sdl_window) {
+    fprintf(stderr, "Couldn't open 640x480 window: %s\n", SDL_GetError());
+	exit(-1);
+  }
+
+  //g.sdl_renderer = SDL_CreateRenderer(g.sdl_window, -1, 0);
+  //if (!g.sdl_renderer) {
+    //fprintf(stderr, "Couldn't create sdl renderer: %s\n", SDL_GetError());
+	//exit(-1);
+  //}
+
+  //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+  //SDL_RenderSetLogicalSize(g.sdl_renderer, 640, 480);
+
+  //// tmp
+  //SDL_SetRenderDrawColor(g.sdl_renderer, 0, 0, 0, 255);
+  //SDL_RenderClear(g.sdl_renderer);
+  //SDL_RenderPresent(g.sdl_renderer);
+
+  //g.screen_tex = SDL_CreateTexture(g.sdl_renderer,
+    //SDL_PIXELFORMAT_INDEX8,
+	//SDL_TEXTUREACCESS_STREAMING,
+	//640, 480);
+  //if (!g.screen_tex) {
+    //fprintf(stderr, "Couldn't create screen texture: %s\n", SDL_GetError());
+	//exit(-1);
+  //}
+
+  /*g.physicalscreen = SDL_SetVideoMode(640, 480, 8,
                                       SDL_HWSURFACE|SDL_HWPALETTE);*/
-  g.physicalscreen = SDL_SetVideoMode(640, 480, 8, 
-                              SDL_HWSURFACE|SDL_HWPALETTE|SDL_FULLSCREEN|SDL_HWACCEL);
+  //g.physicalscreen = SDL_SetVideoMode(640, 480, 8,
+                              //SDL_HWSURFACE|SDL_HWPALETTE|SDL_FULLSCREEN|SDL_HWACCEL);
+  g.physicalscreen = SDL_GetWindowSurface(g.sdl_window);
   if (g.physicalscreen == NULL){
-    fprintf(stderr, "Couldn't set 640x480x8 physical video mode: %s\n",SDL_GetError());
+    fprintf(stderr, "Couldn't set 640x480 physical video mode: %s\n", SDL_GetError());
     exit(1);
   }
 
-  g.virtualscreen = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 480, 8,
+  g.virtualscreen = SDL_CreateRGBSurface(0, 640, 480, 8,
                                          0, 0, 0, 0);
   if (g.virtualscreen == NULL){
     fprintf(stderr, "Couldn't set 640x480x8 virtual video mode: %s\n",SDL_GetError());
     exit(1);
   }
 
-  g.gamescreen = SDL_CreateRGBSurface(SDL_SWSURFACE, GAME_WIDTH, GAME_HEIGHT, 8,
+  g.gamescreen = SDL_CreateRGBSurface(0, GAME_WIDTH, GAME_HEIGHT, 8,
                                       0, 0, 0, 0);
   if (g.gamescreen == NULL){
     fprintf(stderr, "Couldn't set game video mode: %s\n",SDL_GetError());
@@ -60,7 +93,7 @@ void load_font(SDL_Surface *screen, SDLfont &whitefont, SDLfont &greenfont){
   whitefont.colour(screen, 1, 0);
   greenfont = whitefont;
   greenfont.colour(screen, 13, 0);
-  
+
 }
 
 // Load shapes and set palette
@@ -74,7 +107,7 @@ void load_shapes(gamedata &g,shape images[]){
   if(fin.fail()){
     fprintf(stderr, "Could not open file: %s\n", filename);
     exit(-1);
-  }  
+  }
 
   {
     char dummy[14];
@@ -84,25 +117,25 @@ void load_shapes(gamedata &g,shape images[]){
     int red, green, blue;
     for( int c1=0;c1<256;c1++) {
       SDL_Color col = { 0, 0, 0, 0 };
-      SDL_SetColors(g.physicalscreen, &col, c1, 1);
+      FIXME(SDL_SetColors(g.physicalscreen, &col, c1, 1));
     }
     for (int c2=0;c2<16;c2++){
       fin >> red >> green >> blue;
-      SDL_Color col = { red * 4, green * 4, blue * 4, 0 };
-      SDL_SetColors(g.physicalscreen, &col, c2, 1);
+      SDL_Color col = { static_cast<Uint8>((Uint8)red * 4), static_cast<Uint8>((Uint8)green * 4), static_cast<Uint8>(blue * 4), 0 };
+      FIXME(SDL_SetColors(g.physicalscreen, &col, c2, 1));
     }
     for (int c3=0;c3<25;c3++){
       int green = ((2*c3) % 64) * 4;
       int blue = ((15+2*c3) % 64) * 4;
-      SDL_Color col = { 0, green, blue, 0 };
-      SDL_SetColors(g.physicalscreen, &col, c3+16, 1);
+      SDL_Color col = { 0, static_cast<Uint8>(green), static_cast<Uint8>(blue), 0 };
+      FIXME(SDL_SetColors(g.physicalscreen, &col, c3+16, 1));
     }
     for (int c4=0;c4<256;c4++){
       Uint8 rgb[3];
-      SDL_GetRGB(c4, g.physicalscreen->format, &rgb[0], &rgb[1], &rgb[2]);
+      FIXME(SDL_GetRGB(c4, g.physicalscreen->format, &rgb[0], &rgb[1], &rgb[2]));
       SDL_Color col = { rgb[0], rgb[1], rgb[2], 0 };
-      SDL_SetColors(g.virtualscreen, &col, c4, 1);
-      SDL_SetColors(g.gamescreen, &col, c4, 1);
+      FIXME(SDL_SetColors(g.virtualscreen, &col, c4, 1));
+      FIXME(SDL_SetColors(g.gamescreen, &col, c4, 1));
     }
     fin.read(dummy, 1);
   }
@@ -113,11 +146,11 @@ void load_shapes(gamedata &g,shape images[]){
 
   for (int c=0;c<256;c++){
     Uint8 rgb[3];
-    SDL_GetRGB(c, g.physicalscreen->format, &rgb[0], &rgb[1], &rgb[2]);
+    FIXME(SDL_GetRGB(c, g.physicalscreen->format, &rgb[0], &rgb[1], &rgb[2]));
     SDL_Color col = { rgb[0], rgb[1], rgb[2], 0 };
     for (int i=0;i<=318;i++){
       if (images[i].getSurface() != NULL)
-        SDL_SetColors(images[i].getSurface(), &col, c, 1);
+        FIXME(SDL_SetColors(images[i].getSurface(), &col, c, 1));
     }
   }
 
@@ -132,7 +165,7 @@ void init_sound(sampleio &sound){
   char filenames[14][255];
   for (int i=0;i<14;i++){
     strcpy(filenames[i],AP_PATH);
-  } 
+  }
   strcat(filenames[0],"engine.wav");
   strcat(filenames[1],"jet.wav");
   strcat(filenames[2],"explode.wav");
@@ -218,8 +251,8 @@ void init_gameconstants(gamedata &g){
 string getConfig(string config, string name, string defval)
 {
   // Pull out just the name line
-  unsigned int ndx = config.find(name);
-  
+  size_t ndx = config.find(name);
+
   if (ndx == string::npos)
   {
     return defval;
@@ -241,8 +274,8 @@ string getConfig(string config, string name, string defval)
 int getConfig(string config, string name, int defval, int min, int max)
 {
   // Pull out just the name line
-  unsigned int ndx = config.find(name);
-  
+  size_t ndx = config.find(name);
+
   if (ndx == string::npos)
   {
     return defval;
@@ -297,7 +330,7 @@ void init_gamedata(gamedata &g){
 
   // Number of planes (1-6)
   g.planes = getConfig(config, "NUM_PLANES", 2, 1, 6);
-  
+
   // Number of players (1 or 2)
   g.players = getConfig(config, "NUM_HUMANS", 1, 1, 2);
   // Error check
@@ -371,12 +404,12 @@ void init_gamedata(gamedata &g){
 
   // Number of neutral anti-aircraft guns
   g.guns = getConfig(config, "NUM_GUNS", 5, 0, 20);
-  
+
   // Number of other buildings
   g.buildings = getConfig(config, "NUM_BUILDINGS", 20, 0 ,50);
-  
+
   // Number of trees (max)
-  g.trees = getConfig(config, "NUM_TREES", 50, 0, 100); 
+  g.trees = getConfig(config, "NUM_TREES", 50, 0, 100);
 
   // Draks: 0=Never, 1=5% probability, 2=Always
   string drakval = getConfig(config, "DRAK", "sometimes");
@@ -407,23 +440,21 @@ void init_data(gamedata &g){
   srand(time(0));
 
   /* Initialize defaults, Video and Audio */
-  if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO)==-1)){
+  if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1)){
     fprintf(stderr, "Could not initialize SDL: %s.\n", SDL_GetError());
     exit(-1);
   }
 
   setup_display(g);
 
-  // Set Window title
-  SDL_WM_SetCaption("Apricots", NULL);
-
   // Hide cursor
   SDL_ShowCursor(0);
-  
+
   load_shapes(g, g.images);
 
   load_font(g.virtualscreen, g.whitefont, g.greenfont);
-  
+
   init_sound(g.sound);
 
 }
+

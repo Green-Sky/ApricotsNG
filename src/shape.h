@@ -10,6 +10,8 @@
 #include <fstream>
 using namespace std;
 
+#define FIXME(x) printf("FIXME: '%s'\n", #x);
+
 class shape{
   private:
     SDL_Surface *surface;
@@ -39,3 +41,4 @@ class shape{
     bool writefile(char*);
     bool collide(int, int, const shape &, int, int);
 };
+

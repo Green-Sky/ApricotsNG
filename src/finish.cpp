@@ -72,7 +72,8 @@ void finish_game(gamedata &g){
       rect.w = 640;
       rect.h = 480;
     SDL_BlitSurface(g.virtualscreen, &rect, g.physicalscreen, NULL);
-    SDL_UpdateRect(g.physicalscreen, 0, 0, 0, 0);
+    //SDL_UpdateRect(g.physicalscreen, 0, 0, 0, 0);
+	SDL_UpdateWindowSurface(g.sdl_window); // flip
     g.sound.play(SOUND_FINISH);
 // Wait 4 Seconds
    int then = time(0);
