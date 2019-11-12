@@ -18,6 +18,10 @@
 
 #include "apricots.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 // Fire shot
 
 void fire_shot(plane &p, linkedlist <shottype> &shot, sampleio &sound,
@@ -387,29 +391,30 @@ Uint32 time_left(Uint32 next_time){
     return next_time - now;
 }
 
+// Main game iteration
 
-// Main game loop
-
-void game (gamedata &g){
-
+static void game_iteration(void *user_data) {
+  gamedata &g = *(gamedata*)user_data;
   SDL_Event event;
-  bool quit = false;
 
-  // Set first tick interval
-  Uint32 next_time = SDL_GetTicks() + TICK_INTERVAL;
 
-  while (!quit && (g.winner == 0)){
+  //while (!quit && (g.winner == 0)){
 
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
     if (keys[SDL_SCANCODE_ESCAPE] == SDL_PRESSED){
-      quit = true;
+      g.quit = true;
     }
+
+	if (g.winner != 0) {
+      g.quit = true;
+	  return;
+	}
 
     if (SDL_PollEvent(&event) == 1){
       switch (event.type){
 		  case SDL_QUIT:
 			printf("Quit requested, quitting.\n");
-			quit = true;
+			g.quit = true;
       		break;
           case SDL_WINDOWEVENT:
 			g.physicalscreen = SDL_GetWindowSurface(g.sdl_window);
@@ -449,10 +454,31 @@ void game (gamedata &g){
     all(g);
     drawall(g);
 
+
+  //}
+}
+
+
+// Main game loop
+
+void game (gamedata &g){
+
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop_arg(game_iteration, &g, 1/20, 1);
+#else
+  g.quit = false;
+
+  // Set first tick interval
+  Uint32 next_time = SDL_GetTicks() + TICK_INTERVAL;
+
+  while (!g.quit && (g.winner == 0)){
+    game_iteration(&g);
+
     // Delay for time remaining in TICK_INTERVAL
     SDL_Delay(time_left(next_time));
     next_time = SDL_GetTicks() + TICK_INTERVAL;
-
   }
+#endif
+
 }
 

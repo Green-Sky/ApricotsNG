@@ -20,7 +20,11 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 	endif()
 endif()
 
-find_package(SDL2 REQUIRED)
+if(NOT EMSCRIPTEN)
+	find_package(SDL2 REQUIRED)
+endif()
+
+set(AP_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
 
 add_subdirectory("src")
 

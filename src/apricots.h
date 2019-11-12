@@ -324,6 +324,8 @@ struct gamedata{
   SDL_Surface *gamescreen;
   //SDL_Palette *sdl_palette;
 
+  bool quit;
+
   shape images[319];
   map gamemap;
   linkedlist <radartype> radar;
