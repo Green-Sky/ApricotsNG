@@ -366,7 +366,7 @@ void control(gamedata &g, const Uint8 *keys, int &jx, int &jy, bool &jb){
                SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_RETURN);
       break;
     case 2: // Player 2
-      keyboard(keys, jx, jy, jb, SDL_SCANCODE_S, SDL_SCANCODE_S,
+      keyboard(keys, jx, jy, jb, SDL_SCANCODE_S, SDL_SCANCODE_X,
                SDL_SCANCODE_Z, SDL_SCANCODE_C, SDL_SCANCODE_LCTRL);
       break;
     default: // Computer controlled
@@ -407,12 +407,13 @@ void game (gamedata &g){
 
     if (SDL_PollEvent(&event) == 1){
       switch (event.type){
-
-      case SDL_QUIT: {
-        printf("Quit requested, quitting.\n");
-        quit = true;
-      }
-      break;
+		  case SDL_QUIT:
+			printf("Quit requested, quitting.\n");
+			quit = true;
+      		break;
+          case SDL_WINDOWEVENT:
+			g.physicalscreen = SDL_GetWindowSurface(g.sdl_window);
+			break;
       }
     }
 
