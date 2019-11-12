@@ -40,10 +40,10 @@ const double GAME_SPEED = 0.5;
 const int TICK_INTERVAL = 20;
 const double PI = 3.141592;
 
-// Default data directory path (current directory)
+// Default data directory path (res/ in current directory)
 
 #ifndef AP_PATH
-#define AP_PATH "../res/"
+#define AP_PATH "./res/"
 #endif
 
 // Datatypes
