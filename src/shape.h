@@ -10,8 +10,6 @@
 #include <fstream>
 using namespace std;
 
-#define FIXME(x) printf("FIXME: '%s' in %s(%d)\n", #x, __FILE__, __LINE__);
-
 class shape{
   private:
     SDL_Surface *surface;
