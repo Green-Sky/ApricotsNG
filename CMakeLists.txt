@@ -22,5 +22,6 @@ endif()
 
 find_package(SDL2 REQUIRED)
 
+add_subdirectory("external/mojoal")
 add_subdirectory("src")
 
