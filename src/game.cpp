@@ -401,7 +401,7 @@ void game (gamedata &g){
   while (!quit && (g.winner == 0)){
 
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
-    if (keys[SDLK_ESCAPE] == SDL_PRESSED){
+    if (keys[SDL_SCANCODE_ESCAPE] == SDL_PRESSED){
       quit = true;
     }
 

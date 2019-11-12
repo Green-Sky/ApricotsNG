@@ -10,7 +10,7 @@
 #include <fstream>
 using namespace std;
 
-#define FIXME(x) printf("FIXME: '%s'\n", #x);
+#define FIXME(x) printf("FIXME: '%s' in %s(%d)\n", #x, __FILE__, __LINE__);
 
 class shape{
   private:

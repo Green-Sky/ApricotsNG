@@ -28,16 +28,16 @@ void setup_display(gamedata &g){
   g.sdl_window = SDL_CreateWindow("ApricotsNG",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
     640, 480,
-    SDL_WINDOW_FULLSCREEN);
+    0/*SDL_WINDOW_FULLSCREEN*/);
   if (!g.sdl_window) {
     fprintf(stderr, "Couldn't open 640x480 window: %s\n", SDL_GetError());
-	exit(-1);
+    exit(-1);
   }
 
   //g.sdl_renderer = SDL_CreateRenderer(g.sdl_window, -1, 0);
   //if (!g.sdl_renderer) {
     //fprintf(stderr, "Couldn't create sdl renderer: %s\n", SDL_GetError());
-	//exit(-1);
+    //exit(-1);
   //}
 
   //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
@@ -50,11 +50,11 @@ void setup_display(gamedata &g){
 
   //g.screen_tex = SDL_CreateTexture(g.sdl_renderer,
     //SDL_PIXELFORMAT_INDEX8,
-	//SDL_TEXTUREACCESS_STREAMING,
-	//640, 480);
+    //SDL_TEXTUREACCESS_STREAMING,
+    //640, 480);
   //if (!g.screen_tex) {
     //fprintf(stderr, "Couldn't create screen texture: %s\n", SDL_GetError());
-	//exit(-1);
+    //exit(-1);
   //}
 
   /*g.physicalscreen = SDL_SetVideoMode(640, 480, 8,
@@ -63,14 +63,14 @@ void setup_display(gamedata &g){
                               //SDL_HWSURFACE|SDL_HWPALETTE|SDL_FULLSCREEN|SDL_HWACCEL);
   g.physicalscreen = SDL_GetWindowSurface(g.sdl_window);
   if (g.physicalscreen == NULL){
-    fprintf(stderr, "Couldn't set 640x480 physical video mode: %s\n", SDL_GetError());
+    fprintf(stderr, "Couldn't get window surface: %s\n", SDL_GetError());
     exit(1);
   }
 
   g.virtualscreen = SDL_CreateRGBSurface(0, 640, 480, 8,
                                          0, 0, 0, 0);
   if (g.virtualscreen == NULL){
-    fprintf(stderr, "Couldn't set 640x480x8 virtual video mode: %s\n",SDL_GetError());
+    fprintf(stderr, "Couldn't create 640x480x8 virtual screen: %s\n",SDL_GetError());
     exit(1);
   }
 
@@ -98,7 +98,7 @@ void load_font(SDL_Surface *screen, SDLfont &whitefont, SDLfont &greenfont){
 
 // Load shapes and set palette
 
-void load_shapes(gamedata &g,shape images[]){
+void load_shapes(gamedata &g, shape images[]){
 
   char filename[255];
   strcpy(filename,AP_PATH);
@@ -117,25 +117,23 @@ void load_shapes(gamedata &g,shape images[]){
     int red, green, blue;
     for( int c1=0;c1<256;c1++) {
       SDL_Color col = { 0, 0, 0, 0 };
-      FIXME(SDL_SetColors(g.physicalscreen, &col, c1, 1));
+      SDL_SetPaletteColors(g.virtualscreen->format->palette, &col, c1, 1);
     }
     for (int c2=0;c2<16;c2++){
       fin >> red >> green >> blue;
       SDL_Color col = { static_cast<Uint8>((Uint8)red * 4), static_cast<Uint8>((Uint8)green * 4), static_cast<Uint8>(blue * 4), 0 };
-      FIXME(SDL_SetColors(g.physicalscreen, &col, c2, 1));
+      SDL_SetPaletteColors(g.virtualscreen->format->palette, &col, c2, 1);
     }
     for (int c3=0;c3<25;c3++){
       int green = ((2*c3) % 64) * 4;
       int blue = ((15+2*c3) % 64) * 4;
       SDL_Color col = { 0, static_cast<Uint8>(green), static_cast<Uint8>(blue), 0 };
-      FIXME(SDL_SetColors(g.physicalscreen, &col, c3+16, 1));
+      SDL_SetPaletteColors(g.virtualscreen->format->palette, &col, c3+16, 1);
     }
-    for (int c4=0;c4<256;c4++){
-      Uint8 rgb[3];
-      FIXME(SDL_GetRGB(c4, g.physicalscreen->format, &rgb[0], &rgb[1], &rgb[2]));
-      SDL_Color col = { rgb[0], rgb[1], rgb[2], 0 };
-      FIXME(SDL_SetColors(g.virtualscreen, &col, c4, 1));
-      FIXME(SDL_SetColors(g.gamescreen, &col, c4, 1));
+    {
+      SDL_SetPaletteColors(g.gamescreen->format->palette,
+        g.virtualscreen->format->palette->colors,
+        0, g.virtualscreen->format->palette->ncolors);
     }
     fin.read(dummy, 1);
   }
@@ -144,14 +142,11 @@ void load_shapes(gamedata &g,shape images[]){
   for (int j=69;j<=318;j++)
     images[j].read(fin);
 
-  for (int c=0;c<256;c++){
-    Uint8 rgb[3];
-    FIXME(SDL_GetRGB(c, g.physicalscreen->format, &rgb[0], &rgb[1], &rgb[2]));
-    SDL_Color col = { rgb[0], rgb[1], rgb[2], 0 };
-    for (int i=0;i<=318;i++){
-      if (images[i].getSurface() != NULL)
-        FIXME(SDL_SetColors(images[i].getSurface(), &col, c, 1));
-    }
+  for (int i=0;i<=318;i++){
+    if (images[i].getSurface() != NULL)
+      SDL_SetPaletteColors(images[i].getSurface()->format->palette,
+        g.virtualscreen->format->palette->colors,
+        0, g.virtualscreen->format->palette->ncolors);
   }
 
   fin.close();

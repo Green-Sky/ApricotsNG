@@ -28,7 +28,7 @@
 #include "SDLfont.h"
 using namespace std;
 
-#define FIXME(x) printf("FIXME: '%s'\n", #x);
+#define FIXME(x) printf("FIXME: '%s' in %s(%d)\n", #x, __FILE__, __LINE__);
 
 // Global constants
 
@@ -43,7 +43,7 @@ const double PI = 3.141592;
 // Default data directory path (current directory)
 
 #ifndef AP_PATH
-#define AP_PATH "./"
+#define AP_PATH "../res/"
 #endif
 
 // Datatypes
@@ -319,9 +319,10 @@ struct gamedata{
   SDL_Window *sdl_window;
   //SDL_Renderer *sdl_renderer;
   SDL_Surface *physicalscreen;
-  SDL_Texture *screen_tex;
-  SDL_Surface *virtualscreen;
+  //SDL_Texture *screen_tex;
+  SDL_Surface *virtualscreen; // holds the palette
   SDL_Surface *gamescreen;
+  //SDL_Palette *sdl_palette;
 
   shape images[319];
   map gamemap;
