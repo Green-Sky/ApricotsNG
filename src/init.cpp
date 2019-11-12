@@ -176,7 +176,8 @@ void init_sound(sampleio &sound){
   strcat(filenames[12],"afterburner.wav");
   strcat(filenames[13],"finish.wav");
 
-  sound.init(14, filenames, 2, 6);
+  //sound.init(14, filenames, 2, 6);
+  sound.init(14, filenames, 2, 6 *8); // HACK: increase pool, mojoal deadlocks on low pool ?
 
 }
 

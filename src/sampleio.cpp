@@ -117,12 +117,12 @@ void sampleio :: init(int nsamples, char filenames[][255], int nsources,
       exit(1);
     }
 
-	ALenum alfmt = AL_NONE;
+    ALenum alfmt = AL_NONE;
     if ((alfmt = get_openal_format(&spec)) == AL_NONE) {
       //printf("Can't queue '%s', format not supported by the AL.\n", fname);
       cerr << "sampleio: could not open " << filenames[i] << ", format not supported by the al.\n";
       SDL_FreeWAV(buf);
-	  exit(1);
+      exit(1);
     }
 
     alBufferData(samples[i], alfmt, buf, buflen, spec.freq);
