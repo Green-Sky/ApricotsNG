@@ -27,4 +27,7 @@ target_include_directories(apricots_ng PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(apricots_ng PUBLIC "${SDL2_INCLUDE_DIR}")
 
 target_link_libraries(apricots_ng ${SDL2_LIBRARY})
+target_link_libraries(apricots_ng mojoal)
+
+target_compile_definitions(apricots_ng PUBLIC AP_AUDIO_OPENAL)
 
