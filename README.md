@@ -2,6 +2,8 @@
 
 A Apricots port to SDL2 and a modern build system (cmake).
 
+[try Emscripten-port in browser](https://green-sky.github.io/ApricotsNG/)
+
 Should build on any modern build system supporting at least cmake 3.0 and c++.
 
 ## Important Changes

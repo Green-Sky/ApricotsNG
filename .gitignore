@@ -39,4 +39,5 @@ cmake-build-debugandtest/
 *.coredump
 compile_commands.json
 /build
+*.altrace
 

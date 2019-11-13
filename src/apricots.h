@@ -36,8 +36,11 @@ const int GAME_WIDTH = 2400;
 const int GAME_HEIGHT = 320;
 const int MAP_W = GAME_WIDTH / 32;
 const int MAP_H = GAME_HEIGHT / 32;
-const double GAME_SPEED = 0.5;
-const int TICK_INTERVAL = 20;
+//const double GAME_SPEED = 0.5;
+//const int TICK_INTERVAL = 20;
+// 60fps
+const double GAME_SPEED = 0.4;
+const int TICK_INTERVAL = 16;
 const double PI = 3.141592;
 
 // Default data directory path (res/ in current directory)
@@ -323,6 +326,8 @@ struct gamedata{
   SDL_Surface *virtualscreen; // holds the palette
   SDL_Surface *gamescreen;
   //SDL_Palette *sdl_palette;
+
+  bool quit;
 
   shape images[319];
   map gamemap;
