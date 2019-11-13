@@ -20,12 +20,27 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 	endif()
 endif()
 
+# either
+option(USE_OPENAL "use openal" ON)
+option(USE_MOJOAL "use mojoal" OFF)
+
+if(USE_OPENAL AND USE_MOJOAL)
+	message(FATAL_ERROR "you cant use both, openal AND mojoal!")
+endif()
+
 if(NOT EMSCRIPTEN)
 	find_package(SDL2 REQUIRED)
 endif()
 
+if(USE_OPENAL)
+	find_package(OpenAL REQUIRED)
+endif()
+
 set(AP_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
 
-add_subdirectory("external/mojoal")
+if(USE_MOJOAL)
+	add_subdirectory("external/mojoal")
+endif()
+
 add_subdirectory("src")
 

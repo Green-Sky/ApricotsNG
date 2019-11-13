@@ -436,7 +436,7 @@ void init_data(gamedata &g){
   srand(time(0));
 
   /* Initialize defaults, Video and Audio */
-  if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1)){
+  if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)){
     fprintf(stderr, "Could not initialize SDL: %s.\n", SDL_GetError());
     exit(-1);
   }
