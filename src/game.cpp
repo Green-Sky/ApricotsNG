@@ -464,7 +464,11 @@ static void game_iteration(void *user_data) {
 void game (gamedata &g){
 
 #ifdef __EMSCRIPTEN__
-	emscripten_set_main_loop_arg(game_iteration, &g, 1000/TICK_INTERVAL, 1);
+	if (TICK_INTERVAL == 16) {
+		emscripten_set_main_loop_arg(game_iteration, &g, 0, 1);
+	} else {
+		emscripten_set_main_loop_arg(game_iteration, &g, 1000/TICK_INTERVAL, 1);
+	}
 #else
   g.quit = false;
 
