@@ -176,7 +176,8 @@ void init_sound(sampleio &sound){
   strcat(filenames[12],"afterburner.wav");
   strcat(filenames[13],"finish.wav");
 
-  sound.init(14, filenames, 2, 6);
+  //sound.init(14, filenames, 2, 6);
+  sound.init(14, filenames, 2, 6 *8); // HACK: increase pool, mojoal deadlocks on low pool ?
 
 }
 
@@ -435,7 +436,7 @@ void init_data(gamedata &g){
   srand(time(0));
 
   /* Initialize defaults, Video and Audio */
-  if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1)){
+  if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)){
     fprintf(stderr, "Could not initialize SDL: %s.\n", SDL_GetError());
     exit(-1);
   }

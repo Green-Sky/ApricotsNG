@@ -29,7 +29,7 @@ typedef bool ALboolean;
 #if AP_AUDIO==AUDIO_OPENAL
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <AL/alut.h>
+//#include <AL/alut.h>
 #endif
 
 #include <cstdio>
@@ -41,6 +41,9 @@ using namespace std;
 
 class sampleio{
   private:
+    ALCdevice *openal_device;
+	ALCcontext *openal_context;
+
     int numsamples;
     int numsources;
     int numpool;

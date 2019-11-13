@@ -14,6 +14,8 @@
 
 #include "sampleio.h"
 
+#include <SDL.h>
+
 // Empty Noaudio sound routines
 #if AP_AUDIO==AUDIO_NOAUDIO
 
@@ -33,6 +35,25 @@ ALboolean sampleio :: sourceisplaying(ALuint){return false;}
 
 // OpenAL sound routines
 #if AP_AUDIO==AUDIO_OPENAL
+
+// taken from mojoal example code
+static ALenum get_openal_format(const SDL_AudioSpec *spec)
+{
+    if ((spec->channels == 1) && (spec->format == AUDIO_U8)) {
+        return AL_FORMAT_MONO8;
+    } else if ((spec->channels == 1) && (spec->format == AUDIO_S16SYS)) {
+        return AL_FORMAT_MONO16;
+    } else if ((spec->channels == 2) && (spec->format == AUDIO_U8)) {
+        return AL_FORMAT_STEREO8;
+    } else if ((spec->channels == 2) && (spec->format == AUDIO_S16SYS)) {
+        return AL_FORMAT_STEREO16;
+    } else if ((spec->channels == 1) && (spec->format == AUDIO_F32SYS)) {
+        return alIsExtensionPresent("AL_EXT_FLOAT32") ? alGetEnumValue("AL_FORMAT_MONO_FLOAT32") : AL_NONE;
+    } else if ((spec->channels == 2) && (spec->format == AUDIO_F32SYS)) {
+        return alIsExtensionPresent("AL_EXT_FLOAT32") ? alGetEnumValue("AL_FORMAT_STEREO_FLOAT32") : AL_NONE;
+    }
+    return AL_NONE;
+}
 
 // Constructor
 
@@ -60,42 +81,53 @@ void sampleio :: init(int nsamples, char filenames[][255], int nsources,
   poolcount = numsources;
 
   // Initialize audio device
-  alutInit(0, NULL);
+  openal_device = alcOpenDevice(NULL);
+  if (!openal_device) {
+    cerr << "sampleio: error opening openal default device!\n";
+    exit(1);
+  }
+
+  openal_context = alcCreateContext(openal_device, NULL);
+  if (!openal_context) {
+    cerr << "sampleio: could not create openal context!\n";
+    alcCloseDevice(openal_device);
+    exit(1);
+  }
+
+  alcMakeContextCurrent(openal_context);
 
   ALfloat zeroes[] = { 0.0f, 0.0f,  0.0f };
   ALfloat back[]   = { 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f };
   ALfloat front[]  = { 0.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f };
   ALfloat position[] = { 0.0f, 0.0f, -4.0f };
-  ALsizei filelen;
 
   // Setup Listener
-  alListenerfv(AL_POSITION, zeroes );
-  alListenerfv(AL_VELOCITY, zeroes );
-  alListenerfv(AL_ORIENTATION, front );
+  alListenerfv(AL_POSITION, zeroes);
+  alListenerfv(AL_VELOCITY, zeroes);
+  alListenerfv(AL_ORIENTATION, front);
 
   // Load in samples
-  ALvoid* data = malloc(5 * (512 * 3) * 1024);
   alGenBuffers(numsamples, samples);
-
   for (int i = 0; i < numsamples; i++){
-    ALsizei freq;
-    ALboolean fileok;
-    // Evil OpenAL portability fix done here
-#ifdef _WIN32
-    ALenum format;
-    ALboolean trash;
-    alutLoadWAVFile(filenames[i],&format,&data,&filelen,&freq,&trash);
-    fileok = (alGetError() == AL_NO_ERROR);
-#else
-    ALsizei format;
-    ALsizei trash;
-    fileok = alutLoadWAV(filenames[i],&data,&format,&filelen,&trash,&freq);
-#endif
-    if (!fileok){
-      cerr << "sampleio: could not open " << filenames[i] << endl;
+    SDL_AudioSpec spec;
+    Uint8 *buf = NULL;
+    Uint32 buflen = 0;
+    if (!SDL_LoadWAV(filenames[i], &spec, &buf, &buflen)) {
+      cerr << "sampleio: could not open " << filenames[i] << ": " << SDL_GetError() << endl;
       exit(1);
-    }         
-    alBufferData(samples[i], format, data, filelen, freq);
+    }
+
+    ALenum alfmt = AL_NONE;
+    if ((alfmt = get_openal_format(&spec)) == AL_NONE) {
+      //printf("Can't queue '%s', format not supported by the AL.\n", fname);
+      cerr << "sampleio: could not open " << filenames[i] << ", format not supported by the al.\n";
+      SDL_FreeWAV(buf);
+      exit(1);
+    }
+
+    alBufferData(samples[i], alfmt, buf, buflen, spec.freq);
+
+    SDL_FreeWAV(buf);
   }
 
   // Generate Sources
@@ -106,9 +138,7 @@ void sampleio :: init(int nsamples, char filenames[][255], int nsources,
     alSourcefv(sources[j], AL_VELOCITY, zeroes );
     alSourcefv(sources[j], AL_ORIENTATION, back );
   }
-  
-  free(data);
-  
+
 }
 
 // Clearup routine
@@ -119,7 +149,9 @@ void sampleio :: close(){
     delete [] samples;
     delete [] sources;
     initdone = false;
-    alutExit();
+    alcMakeContextCurrent(NULL);
+    alcDestroyContext(openal_context);
+    alcCloseDevice(openal_device);
   }
 
 }
@@ -138,12 +170,12 @@ void sampleio :: channel(int chan, int sample){
     return;
   }
   if ((chan < 0) || (chan >= numsources)){
-    cerr << "sampleio: attempt to play nonexistant source " << chan 
+    cerr << "sampleio: attempt to play nonexistant source " << chan
          << endl;
     return;
   }
   if ((sample < 0) || (sample >= numsamples)){
-    cerr << "sampleio: attempt to play nonexistant sample " << sample 
+    cerr << "sampleio: attempt to play nonexistant sample " << sample
          << endl;
     return;
   }
@@ -160,12 +192,12 @@ void sampleio :: loop(int chan, int sample){
     return;
   }
   if ((chan < 0) || (chan >= numsources)){
-    cerr << "sampleio: attempt to play nonexistant source " << chan 
+    cerr << "sampleio: attempt to play nonexistant source " << chan
          << endl;
     return;
   }
   if ((sample < 0) || (sample >= numsamples)){
-    cerr << "sampleio: attempt to play nonexistant sample " << sample 
+    cerr << "sampleio: attempt to play nonexistant sample " << sample
          << endl;
     return;
   }
@@ -186,7 +218,7 @@ void sampleio :: play(int sample){
     return;
   }
   if ((sample < 0) || (sample >= numsamples)){
-    cerr << "sampleio: attempt to play nonexistant sample " << sample 
+    cerr << "sampleio: attempt to play nonexistant sample " << sample
          << endl;
     return;
   }
@@ -246,7 +278,7 @@ void sampleio :: volume(int i, double vol){
     return;
   }
   if ((i < 0) || (i >= numsources)){
-    cerr << "sampleio: attempt to volume nonexistant source " << i 
+    cerr << "sampleio: attempt to volume nonexistant source " << i
          << endl;
     return;
   }
@@ -265,12 +297,7 @@ ALboolean sampleio ::  sourceisplaying(ALuint sid) {
   }
   state = AL_INITIAL;
 
-  // Evil OpenAL portability fix done here
-#ifdef _WIN32
   alGetSourcei(sid, AL_SOURCE_STATE, &state);
-#else
-  alGetSourceiv(sid, AL_SOURCE_STATE, &state);
-#endif
 
   switch(state) {
     case AL_PLAYING: case AL_PAUSED:
@@ -283,3 +310,4 @@ ALboolean sampleio ::  sourceisplaying(ALuint sid) {
 }
 
 #endif
+
